@@ -26,7 +26,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ["~/plugins/vue_confirm_dialog.client.js"],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -38,18 +38,13 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: [
-    "@nuxtjs/axios", 
-    "@nuxtjs/auth-next", 
-    '@nuxtjs/dayjs',
-    
-  ],
+  modules: ["@nuxtjs/axios", "@nuxtjs/auth-next", "@nuxtjs/dayjs"],
 
   dayjs: {
-    locales: ['en', 'fr'],
-    plugins: ['utc', 'timezone'],
-    defaultLocale: 'en',
-    defaultTimezone: 'Asia/Kolkata',
+    locales: ["en", "fr"],
+    plugins: ["utc", "timezone"],
+    defaultLocale: "en",
+    defaultTimezone: "Asia/Kolkata",
   },
 
   router: {
@@ -81,6 +76,7 @@ export default {
     baseUrl: "http://localhost:8000",
     credentials: true,
   },
+
   auth: {
     strategies: {
       laravelSanctum: {
@@ -92,6 +88,9 @@ export default {
           },
           logout: {
             url: "/logout",
+          },
+          user: {
+            url: "/api/user",
           },
         },
       },
@@ -119,4 +118,6 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+
+  store: true,
 };

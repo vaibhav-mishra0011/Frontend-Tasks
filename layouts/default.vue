@@ -1,17 +1,17 @@
 <template>
-
   <v-app id="name">
-    
-  <v-main>
-    <v-container>
-      <nuxt />
-    </v-container>
-  </v-main>
+    <v-main>
+      <v-container>
+        <nuxt />
+        <client-only>
+          <vue-confirm-dialog />
+        </client-only>
+      </v-container>
+    </v-main>
   </v-app>
 </template>
 
 <script>
-
 </script>
 
 <style>

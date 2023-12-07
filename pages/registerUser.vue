@@ -19,9 +19,9 @@
       <label for="password">Password:</label>
       <input type="password" v-model="user.password" required />
 
-      <button color="primary" @click="register" :loading="loading">
+      <v-btn color="primary" @click="register" :loading="loading">
         Register
-      </button>
+      </v-btn>
       <h4 class="mt-5 text-center">
         if already Register <nuxt-link to="/login"> login here</nuxt-link>
       </h4>
@@ -39,7 +39,7 @@ export default {
         name: "",
         email: "",
         password: "",
-        role_id: 2,
+       snackbarText:"",
       },
     };
   },
@@ -49,7 +49,7 @@ export default {
         this.loading = true;
         await this.$axios.get("/sanctum/csrf-cookie");
         const res = await this.$axios.post("/api/register", this.user);
-        if (res.data.status == 200) {
+        if (res.data.status == true) {
           this.$router.push("/login");
           console.log(res, "res");
           this.snackbarText = "Registered successfully";

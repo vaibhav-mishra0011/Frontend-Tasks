@@ -2,11 +2,25 @@
   <div>
     <div class="login-container">
       <form method="post" @submit.prevent="login">
-      <v-text-field v-model="email" label="Username" type="email" required></v-text-field>
-      <v-text-field v-model="password" label="Password" type="password" required></v-text-field>
-      <v-btn color="success" block type="submit" :loading="loading">Login</v-btn>
-    </form>
-      <h4 class ="mt-5 text-center">if new user <nuxt-link to="/registerUser"> register here</nuxt-link></h4>
+        <v-text-field
+          v-model="email"
+          label="Username"
+          type="email"
+          required
+        ></v-text-field>
+        <v-text-field
+          v-model="password"
+          label="Password"
+          type="password"
+          required
+        ></v-text-field>
+        <v-btn color="success" block type="submit" :loading="loading"
+          >Login</v-btn
+        >
+      </form>
+      <h4 class="mt-5 text-center">
+        if new user <nuxt-link to="/registerUser"> register here</nuxt-link>
+      </h4>
     </div>
     <v-snackbar v-model="snackbar" :timeout="2000">
       {{ snackbarText }}
@@ -26,6 +40,7 @@ export default {
       email: "",
       password: "",
       loading: false,
+      snackbarText: "",
     };
   },
 
@@ -39,18 +54,16 @@ export default {
             password: this.password,
           },
         });
-        this.snackbarText = "logged in successfully";
-        this.snackbar = true;
-        //console.log(response)
-
+        console.log('after login', response)
         if (response.status == 200) {
+          this.snackbarText = "logged in successfully";
+          this.snackbar = true;
           this.$router.push("/dashboard");
-        } else {
-          alert("Invalid credentials. Please try again.");
         }
       } catch (error) {
+        this.snackbarText = "invalid Credentials";
+        this.snackbar = true;
         console.log(error);
-        alert("Some error occured. Unable to login");
       } finally {
         this.loading = false;
       }
@@ -64,7 +77,7 @@ export default {
 .login-container {
   max-width: 300px;
   margin-top: 9rem;
-  margin-left:25rem;
+  margin-left: 25rem;
   padding: 20px;
   background-color: #dbd6d6;
   border-radius: 8px;

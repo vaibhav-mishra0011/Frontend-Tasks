@@ -1,9 +1,13 @@
 <template>
   <div>
     <v-app-bar app>
-      <v-toolbar-title>Hello {{ this.$auth.user.name }}</v-toolbar-title>
+      <v-toolbar-title>Hello {{ this.$auth.user.data.name }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn class="primary" @click.native.stop="addTodoDialog = true" v-if="role_id!=1">
+      <v-btn
+        class="primary"
+        @click.native.stop="addTodoDialog = true"
+        v-if="userRole != 'admin'"
+      >
         +Add Task
       </v-btn>
       <v-btn class="primary ml-3" @click="logout">Logout</v-btn>
@@ -85,8 +89,9 @@
                   @update:items-per-page="handlePerPageUpdate"
                   :sort-by.sync="sortBy"
                   :sort-desc.sync="sortDesc"
+                  @update:sort-desc="fetchTasks"
                 >
-                  <template #item.index="{ item, index }">
+                  <template #item.index="{ index }">
                     {{ index + 1 }}
                   </template>
                   <template #item.created_at="{ item }">
@@ -103,7 +108,7 @@
 
                   <template v-slot:item.action="{ item }">
                     <div class="d-flex">
-                      <v-btn v-if="role_id!=1"
+                      <v-btn
                         :loading="item.loading"
                         elevation="0"
                         icon
@@ -114,19 +119,18 @@
                       </v-btn>
 
                       <v-btn
-                        v-if="item.id!=itemIdToDelete"
+                        v-if="item.id != itemIdToDelete"
                         :loading="item.loading"
                         elevation="0"
                         icon
                         color="red"
-                        @click="deleteTask(item.id)"
+                        @click="confirmDeleteTask(item.id)"
                       >
                         <v-icon dark>mdi-delete</v-icon>
                       </v-btn>
-                      
+
                       <v-progress-circular v-else indeterminate color="primary">
                       </v-progress-circular>
-
                     </div>
                   </template>
                 </v-data-table>
@@ -150,7 +154,7 @@
 export default {
   data() {
     return {
-      itemIdToDelete:null,
+      itemIdToDelete: null,
       sortBy: "created_at",
       sortDesc: true,
       editTodoId: "",
@@ -165,8 +169,8 @@ export default {
       loading: false,
       addTodoDialog: false,
       user_id: this.$auth.user.id,
-      role_id: this.$auth.user.role_id,
-      checkboxDisabled: this.$auth.user.role_id==1?true:false,
+      userRole: this.$auth.user.role[0],
+      checkboxDisabled: this.userRole != "admin" ? true : false,
       task: {
         name: "",
         description: "",
@@ -186,12 +190,14 @@ export default {
     this.fetchTasks();
   },
   methods: {
+    handleSort(){
+      console.log('asd')
+    },
     async updateStatus(item) {
       try {
-        const res = await this.$axios.patch(
-          `/api/task/${this.item.id}`,
-          {completed:item.completed}
-        );
+        const res = await this.$axios.patch(`/api/task/${this.item.id}`, {
+          completed: item.completed,
+        });
         this.editTodoDialog = false;
         this.snackbarText = "you task has been edited";
         this.snackbar = true;
@@ -220,6 +226,7 @@ export default {
       }
     },
     async fetchTasks() {
+      console.log("fetched", this.$auth.user.role[0]);
       try {
         this.loading = true;
         const { data } = await this.$axios.get(
@@ -259,17 +266,15 @@ export default {
 
     async deleteTask(taskId) {
       try {
-        this.itemIdToDelete=taskId;
+        this.itemIdToDelete = taskId;
         const res = await this.$axios.delete(`/api/task/${taskId}`);
         this.snackbarText = "you task has been deleted";
         this.snackbar = true;
         this.fetchTasks();
-
       } catch (error) {
         console.log(error);
-      } finally{
-
-        this.itemIdToDelete=null;
+      } finally {
+        this.itemIdToDelete = null;
       }
     },
 
@@ -283,7 +288,6 @@ export default {
     },
 
     async updateTask() {
-
       const updatedValues = {
         name: this.task.name,
         description: this.task.description,
@@ -292,20 +296,39 @@ export default {
       console.log(updatedValues);
 
       try {
-        this.loading=true;
+        this.loading = true;
         const res = await this.$axios.patch(
           `/api/task/${this.editTodoId}`,
           updatedValues
         );
+        console.log(res);
         this.editTodoDialog = false;
         this.snackbarText = "you task has been edited";
         this.snackbar = true;
         this.fetchTasks();
       } catch (e) {
         console.log(e);
-      }finally{
-        this.loading=false;
+      } finally {
+        this.loading = false;
       }
+    },
+    confirmDeleteTask(taskId) {
+      this.$confirm({
+        message: "Are you sure?",
+        button: {
+          no: "No",
+          yes: "Yes",
+        },
+        /**
+         * Callback Function
+         * @param {Boolean} confirm
+         */
+        callback: (confirm) => {
+          if (confirm) {
+            this.deleteTask(taskId);
+          }
+        },
+      });
     },
   },
 };
