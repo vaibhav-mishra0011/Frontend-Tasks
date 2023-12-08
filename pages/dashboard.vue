@@ -11,6 +11,19 @@
         +Add Task
       </v-btn>
       <v-btn class="primary ml-3" @click="logout">Logout</v-btn>
+
+      <v-btn class="primary ml-3" @click="exportTaskList"
+        >Export Task List</v-btn
+      >
+      <div>
+        <input
+          class="mx-3"
+          type="file"
+          ref="fileInput"
+          @change="handleFileChange"
+        />
+        <v-btn @click="uploadFile">Import</v-btn>
+      </div>
     </v-app-bar>
 
     <v-layout row justify-end>
@@ -190,8 +203,8 @@ export default {
     this.fetchTasks();
   },
   methods: {
-    handleSort(){
-      console.log('asd')
+    handleSort() {
+      console.log("asd");
     },
     async updateStatus(item) {
       try {
@@ -329,6 +342,47 @@ export default {
           }
         },
       });
+    },
+    handleFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+    uploadFile() {
+      if (!this.selectedFile) {
+        alert("Please select a file");
+        return;
+      }
+      this.handleFileUpload(this.selectedFile);
+    },
+    handleFileUpload(file) {
+      console.log(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      console.log(formData);
+      this.$axios
+        .post("/api/upload", formData)
+        .then((response) => {
+          console.log("File uploaded successfully");
+          this.selectedFile = "";
+          this.snackbarText = "you task has been uploaded successfully";
+          this.snackbar = true;
+          this.fetchTasks();
+        })
+        .catch((error) => {
+          console.error("Error uploading file", error);
+        });
+    },
+
+    async exportTaskList() {
+      await this.$axios
+        .get("/api/export", { responseType: "arraybuffer" })
+        .then((response) => {
+          var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+          var fileLink = document.createElement("a");
+          fileLink.href = fileURL;
+          fileLink.setAttribute("download", "test.xlsx");
+          document.body.appendChild(fileLink);
+          fileLink.click();
+        });
     },
   },
 };
